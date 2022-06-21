@@ -4,8 +4,8 @@ from core.db.models import Chat
 from core.db.models import UsersChat, User
 
 
-def create_chat(db: Session, chat: SchemaChat.ChatCreate):
-    chat_db = Chat(name=chat.name, created_date=chat.created_date, type=chat.type)
+def create_chat(db: Session, chat: SchemaChat.Chat):
+    chat_db = Chat(name=chat.name, type=chat.type)
     db.add(chat_db)
     db.commit()
 

@@ -9,12 +9,9 @@ class Chat(BaseModel):
     type: ChatType
 
 
-class ChatCreate(Chat):
-    created_date: datetime
-
-
 class ChatInDB(Chat):
     id: int
+    created_date: datetime
 
     class Config:
         orm_mode = True
