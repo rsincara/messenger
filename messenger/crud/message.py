@@ -83,7 +83,16 @@ def get_N_last_messages_by_chat_id(db: Session, n: int, chat_id: int, user_id: i
     if not is_user_in_chat:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
 
-    return db.query(Message).filter(Message.chat_id == chat_id).order_by(Message.created_date.desc()).limit(n).all()
+    messages = db.query(Message).filter(Message.chat_id == chat_id).order_by(Message.created_date.desc()).limit(n).all()
+
+    for message in messages:
+        setattr(message, 'isRead', True)
+
+    db.commit()
+
+    messages = db.query(Message).filter(Message.chat_id == chat_id).order_by(Message.created_date.desc()).limit(n).all()
+
+    return messages
 
 
 def get_N_chats_with_last_activities(db: Session, n: int, user_id: int):
