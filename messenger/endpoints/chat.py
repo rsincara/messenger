@@ -2,7 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 
 from deps import get_db
 import crud.chat as crud
-from schemas.chat import Chat, ChatInDB, ChatCreate, ChatWithUsers, ChatWithUsers
+from schemas.chat import Chat, ChatInDB, ChatCreate, ChatWithUsers
+from schemas.message import Message
 
 router = APIRouter(prefix="/chat")
 
@@ -37,3 +38,4 @@ async def update_chat(chat: Chat, chat_id: int, db=Depends(get_db)):
 async def delete_chat(chat_id: int, db=Depends(get_db)):
     """Удалить чат"""
     crud.delete_chat(db=db, chat_id=chat_id)
+

@@ -1,7 +1,7 @@
+import schemas.chat as SchemaChat
 from sqlalchemy.orm import Session
 from core.db.models import Chat
 from core.db.models import UsersChat, User
-import schemas.chat as SchemaChat
 
 
 def create_chat(db: Session, chat: SchemaChat.ChatCreate):
@@ -43,3 +43,5 @@ def get_users_by_chat_id(db: Session, chat_id: int):
         .join(UsersChat, User.id == UsersChat.user_id) \
         .filter(UsersChat.chat_id == chat_id) \
         .all()
+
+

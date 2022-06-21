@@ -2,7 +2,6 @@ from pydantic import BaseModel
 
 from datetime import datetime
 from constants.chat import ChatType
-from schemas.user import UserInDB
 
 
 class Chat(BaseModel):
