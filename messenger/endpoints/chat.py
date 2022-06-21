@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from deps import get_db
+from core.helpers.get_user_or_raise_exception import get_user_or_raise_exception
+from deps import get_db, get_current_user
 import crud.chat as crud
 from schemas.chat import Chat, ChatInDB, ChatWithUsers
 
@@ -8,8 +9,9 @@ router = APIRouter(prefix="/chat")
 
 
 @router.get("/", response_model=ChatWithUsers)
-async def get_chat(chat_id: int, db=Depends(get_db)):
+async def get_chat(chat_id: int, db=Depends(get_db), user_id=Depends(get_current_user)):
     """Получить чат по заданному chat_id"""
+    get_user_or_raise_exception(db=db, user_id=user_id)
     chat = crud.get_chat_by_id(db=db, chat_id=chat_id)
 
     if chat is None:
@@ -22,16 +24,26 @@ async def get_chat(chat_id: int, db=Depends(get_db)):
     return chat_with_users
 
 
+@router.get("/get_user_chats", response_model=list)
+async def get_user_chats(user_id=Depends(get_current_user), db=Depends(get_db)):
+    """Получить чаты пользователя"""
+    get_user_or_raise_exception(db=db, user_id=user_id)
+    chats = crud.get_user_chats(db=db, user_id=user_id)
+    return chats
+
+
 @router.post("/", response_model=ChatInDB)
-async def create_chat(chat: Chat, db=Depends(get_db)):
+async def create_chat(chat: Chat, db=Depends(get_db), user_id=Depends(get_current_user)):
     """Создать чат"""
+    get_user_or_raise_exception(db=db, user_id=user_id)
     result = crud.create_chat(db=db, chat=chat)
     return result
 
 
 @router.put("/{chat_id}", response_model=ChatInDB)
-async def update_chat(chat: Chat, chat_id: int, db=Depends(get_db)):
+async def update_chat(chat: Chat, chat_id: int, db=Depends(get_db), user_id=Depends(get_current_user)):
     """Изменить чат"""
+    get_user_or_raise_exception(db=db, user_id=user_id)
     chat_db = crud.update_chat(db=db, chat_id=chat_id, chat=chat)
     return chat_db
 

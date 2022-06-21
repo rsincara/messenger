@@ -12,6 +12,17 @@ def create_chat(db: Session, chat: SchemaChat.Chat):
     return chat_db
 
 
+def get_user_chats(db: Session, user_id: int):
+    usersChats = db.query(UsersChat).filter(UsersChat.user_id == user_id).all()
+    result = []
+    for userChat in usersChats:
+        chat = db.query(Chat).filter(Chat.id == userChat.chat_id).one_or_none()
+        if chat is not None:
+            result.append(chat)
+
+    return result
+
+
 def get_chat_by_id(db: Session, chat_id: int):
     return db.query(Chat).filter(Chat.id == chat_id).one_or_none()
 
@@ -43,5 +54,3 @@ def get_users_by_chat_id(db: Session, chat_id: int):
         .join(UsersChat, User.id == UsersChat.user_id) \
         .filter(UsersChat.chat_id == chat_id) \
         .all()
-
-
