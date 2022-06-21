@@ -1,29 +1,45 @@
-from datetime import datetime
-from enum import Enum
+from sqlalchemy.orm import Session
+from core.db.models import Chat
+from core.db.models import UsersChat, User
+import schemas.chat as SchemaChat
 
 
-class ChatType(str, Enum):
-    public = "public"
-    private = "private"
-    group = "group"
+def create_chat(db: Session, chat: SchemaChat.ChatCreate):
+    chat_db = Chat(name=chat.name, created_date=chat.created_date, type=chat.type)
+    db.add(chat_db)
+    db.commit()
+
+    return chat_db
 
 
-chat_database = [
-    {
-        "id": 1,
-        "name": "Чат 1",
-        "created_date": datetime(2022, 4, 20, 19, 39, 0),
-        "type": ChatType.group,
-    }
-]
+def get_chat_by_id(db: Session, chat_id: int):
+    return db.query(Chat).filter(Chat.id == chat_id).one_or_none()
 
-user_chat_database = [
-    {
-        "user_id": 1,
-        "chat_id": 1
-    },
-    {
-        "user_id": 2,
-        "chat_id": 1
-    },
-]
+
+def update_chat(db: Session, chat_id: int, chat: SchemaChat.Chat):
+    chat_db = db.query(Chat).filter(Chat.id == chat_id).one_or_none()
+    for param, value in chat.dict().items():
+        setattr(chat_db, param, value)
+    db.commit()
+
+    return chat_db
+
+
+def delete_chat(db: Session, chat_id: int):
+    db.query(Chat).filter(Chat.id == chat_id).delete()
+    db.commit()
+
+
+def add_user_to_chat(db: Session, user_id: int, chat_id: int):
+    user_chat_db = UsersChat(user_id=user_id, chat_id=chat_id)
+    db.add(user_chat_db)
+    db.commit()
+
+    return get_chat_by_id(db, chat_id=chat_id)
+
+
+def get_users_by_chat_id(db: Session, chat_id: int):
+    return db.query(User.id, User.name, User.login) \
+        .join(UsersChat, User.id == UsersChat.user_id) \
+        .filter(UsersChat.chat_id == chat_id) \
+        .all()

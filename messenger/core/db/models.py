@@ -23,7 +23,7 @@ class Chat(Base):
     type = Column(String)
 
 
-class UserChat(Base):
+class UsersChat(Base):
     __tablename__ = "users_chats"
 
     id = Column(Integer, primary_key=True, index=True)
