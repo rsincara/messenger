@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from core.helpers.get_user_or_raise_exception import get_user_or_raise_exception
@@ -56,3 +58,10 @@ async def get_N_chats_with_last_activities(n: int, db=Depends(get_db), user_id=D
     result = crud.get_N_chats_with_last_activities(db=db, n=n, user_id=user.id)
 
     return result
+
+
+@router.post("/send_message_deferred")
+async def send_message(chat_id: int, text: str, date: datetime, db=Depends(get_db), user_id=Depends(get_current_user)):
+    user = get_user_or_raise_exception(db=db, user_id=user_id)
+
+    crud.send_massage_deferred(chat_id=chat_id, user_id=user.id, text=text, date=date)

@@ -1,13 +1,15 @@
 import datetime
-from fastapi import HTTPException, status
+from fastapi import HTTPException, status, Depends
 from sqlalchemy.orm import Session
 from core.db.models import Chat
 from core.db.models import Message
 from core.db.models import User
 from crud.chat import get_users_by_chat_id, get_chat_by_id
+from core.broker.celery import celery_app
+from deps import get_db
 
 
-def send_message_in_chat(db: Session, user_id: int, chat_id: int, text: str):
+def send_message_in_chat(user_id: int, chat_id: int, text: str, db=Depends(get_db)):
     user = db.query(User).filter(User.id == user_id).one_or_none()
     chat = db.query(Chat).filter(Chat.id == chat_id).one_or_none()
 
@@ -108,3 +110,14 @@ def get_N_chats_with_last_activities(db: Session, n: int, user_id: int):
     result = db.execute(query_text).all()
 
     return result
+
+
+@celery_app.task()
+def send_massage_task(user_id: int, chat_id: int, text: str):
+    send_message_in_chat(user_id=user_id, chat_id=chat_id, text=text)
+
+
+def send_massage_deferred(user_id: int, chat_id: int, text: str, date: datetime):
+    send_massage_task.apply_async((
+        user_id, chat_id, text
+    ), eta=date)
